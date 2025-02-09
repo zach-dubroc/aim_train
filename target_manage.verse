@@ -1,3 +1,4 @@
+
 using { /Fortnite.com/Devices }
 using { /Fortnite.com/Game }
 using { /Fortnite.com/Teams }
@@ -8,11 +9,16 @@ using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Random }
 
+
+#todo 
+# make round start on trigger event
+# end when all targets destroyed
+# +5 second penalty if player falls off of path or teleport back 5 yards? or both?
+
 rotate_tag := class(tag):
 item_rotator := class(creative_device):
 
     var PlayerMap :[player]int = map{}
-    var hit_targs : []creative_prop = array{} // Array to track hit targets
 
     @editable stop_watch :timer_device = timer_device{}
     @editable var Speed :float = 0.05
@@ -23,9 +29,10 @@ item_rotator := class(creative_device):
     var idx :int = 0
     
     OnBegin<override>()<suspends>:void=
+
         InitPlayers()
         
-        // Hide targets initially
+        #hide targets initially
         for(targ :int = 0 .. targs.Length-1):
             if (targ > 0):
                 if(targs[targ].Hide()){}
@@ -51,28 +58,21 @@ item_rotator := class(creative_device):
             NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=RandZ}
             MoveResult := Prop.MoveTo(NewPosition, NewRotation, 0.8)
             Sleep(0.01)
+            #maxZ: -9418.539967
+            #minZ: -9666.539967
 
     OnPropDamage(Agent: agent):void=
-        if (HitProp := creative_prop[Agent]):
-            // Check if the target is already in the hit_targs array
-            if (HitProp not in hit_targs):
-                // Add the target to the hit_targs array
-                hit_targs.Append(HitProp)
-                // Hide the target
-                if (HitProp.Hide()):
-                    Print("Target hidden: {HitProp}")
-                // Show the next target if available
-                if (idx + 1 < targs.Length):
-                    if (targs[idx + 1].Show()):
-                        Print("Next target shown: {targs[idx + 1]}")
-                    set idx += 1
-
+        if(targs[idx].Hide()) {}
+        Print("{idx}")
+        if(targs[idx+1].Show()){}
+        set idx += 1        
     InitPlayers():void=
-        // Store players
+        # store players
         AllPlayers := GetPlayspace().GetPlayers()
         for (Player : AllPlayers):
             if (FortCharacter := Player.GetFortCharacter[]):
                 FortCharacter.DamagedEvent().Subscribe(OnPropDamaged)
 
+                
     OnPropDamaged(DM : damage_result):void=
-        Print("Reaching the player damage result")
+        Print("reaching the player damage result")
