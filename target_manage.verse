@@ -17,9 +17,9 @@ using { /Verse.org/Random }
 
 rotate_tag := class(tag):
 item_rotator := class(creative_device):
-    var hit_targs :string = array{}
-    var idx :int = 0
 
+    var idx :int = 0
+    var damage_lock :logic = false
     @editable stop_watch :timer_device = timer_device{}
     @editable var Speed :float = 0.05
     @editable var MinPosition :vector3 = vector3{}
@@ -59,15 +59,22 @@ item_rotator := class(creative_device):
             #minZ: -9666.539967
 
     OnPropDamage(Agent: agent):void=
-        if (idx + 1 < hit_targs.Length):
-            if (targs[idx].Hide()){}
-            Print("hit lenght: {hit_targs.Length}")
-            Print("hit target: {idx}")
-            if (targs[idx+1].Show()){}
-            set idx += 1
-        
 
-    
+        if(damage_lock = false):
+            set damage_lock = true
+            if (idx < targs.Length):
+                if (targs[idx].Hide()){}
+                Print("hit target: {idx}")
+                if (idx + 1 < targs.Length):
+                    if (targs[idx+1].Show()){}
+                set idx += 1
+            spawn:
+                DamageLock(damage_lock)
+
+    DamageLock(d: logic)<suspends>:void=
+        Sleep(0.5)
+        set damage_lock = false
+ 
 
             
                 
