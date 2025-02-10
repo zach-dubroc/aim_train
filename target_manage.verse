@@ -17,8 +17,8 @@ using { /Verse.org/Random }
 
 rotate_tag := class(tag):
 item_rotator := class(creative_device):
-
-    var PlayerMap :[player]int = map{}
+    var hit_targs :string = array{}
+    var idx :int = 0
 
     @editable stop_watch :timer_device = timer_device{}
     @editable var Speed :float = 0.05
@@ -26,12 +26,9 @@ item_rotator := class(creative_device):
     @editable var MaxPosition :vector3 = vector3{}
     @editable var pms : []prop_manipulator_device = array{}
     @editable var targs : []creative_prop = array{}
-    var idx :int = 0
     
     OnBegin<override>()<suspends>:void=
 
-        InitPlayers()
-        
         #hide targets initially
         for(targ :int = 0 .. targs.Length-1):
             if (targ > 0):
@@ -62,17 +59,21 @@ item_rotator := class(creative_device):
             #minZ: -9666.539967
 
     OnPropDamage(Agent: agent):void=
-        if(targs[idx].Hide()) {}
-        Print("{idx}")
-        if(targs[idx+1].Show()){}
-        set idx += 1        
-    InitPlayers():void=
-        # store players
-        AllPlayers := GetPlayspace().GetPlayers()
-        for (Player : AllPlayers):
-            if (FortCharacter := Player.GetFortCharacter[]):
-                FortCharacter.DamagedEvent().Subscribe(OnPropDamaged)
+        if (idx + 1 < hit_targs.Length):
+            if (targs[idx].Hide()){}
+            Print("hit lenght: {hit_targs.Length}")
+            Print("hit target: {idx}")
+            if (targs[idx+1].Show()){}
+            set idx += 1
+        
 
+    
+
+            
                 
-    OnPropDamaged(DM : damage_result):void=
-        Print("reaching the player damage result")
+
+
+
+
+
+
