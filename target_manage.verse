@@ -15,25 +15,24 @@ using { /Verse.org/Random }
 # end when all targets destroyed
 # +5 second penalty if player falls off of path or teleport back 5 yards? or both?
 
+#should use this globally so end device can only trigger after all 20 targs are hit
+var targ_idx : weak_map(session, int) = map{}
+
 rotate_tag := class(tag):
-item_rotator := class(creative_device):
+target_manage := class(creative_device):
 
     var idx :int = 0
     var damage_lock :logic = false
-    @editable stop_watch :timer_device = timer_device{}
+
     @editable var Speed :float = 0.05
     @editable var MinPosition :vector3 = vector3{}
     @editable var MaxPosition :vector3 = vector3{}
     @editable var pms : []prop_manipulator_device = array{}
     @editable var targs : []creative_prop = array{}
-    
+
+
     OnBegin<override>()<suspends>:void=
 
-        #hide targets initially
-        for(targ :int = 0 .. targs.Length-1):
-            if (targ > 0):
-                if(targs[targ].Hide()){}
-            
         TagGenerator := FindCreativeObjectsWithTag(rotate_tag{})
         for (obj : TagGenerator):
             if (Prop := creative_prop[obj]):
@@ -41,6 +40,7 @@ item_rotator := class(creative_device):
                     if(pms[i].DamagedEvent.Subscribe(OnPropDamage)) {}
                 spawn:
                     MoveTargets(Prop)
+ 
 
     MoveTargets<private>(Prop: creative_prop)<suspends>:void=
         loop:
@@ -55,8 +55,9 @@ item_rotator := class(creative_device):
             NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=RandZ}
             MoveResult := Prop.MoveTo(NewPosition, NewRotation, 0.8)
             Sleep(0.01)
-            #maxZ: -9418.539967
             #minZ: -9666.539967
+            #maxZ: -9418.539967
+            #added 100
 
     OnPropDamage(Agent: agent):void=
 
@@ -64,21 +65,31 @@ item_rotator := class(creative_device):
             set damage_lock = true
             if (idx < targs.Length):
                 if (targs[idx].Hide()){}
-                Print("hit target: {idx}")
                 if (idx + 1 < targs.Length):
                     if (targs[idx+1].Show()){}
                 set idx += 1
+                if(set targ_idx[GetSession()] = idx){}
+
+                if(y := targ_idx[GetSession()]){}
             spawn:
                 DamageLock(damage_lock)
 
     DamageLock(d: logic)<suspends>:void=
         Sleep(0.5)
         set damage_lock = false
- 
+
+    Start():void=
+        if(targs[0].Show()){}
+        for(targ :int = 0 .. targs.Length-1):
+            if (targ > 0):
+                if(targs[targ].Hide()){}
+        if (set targ_idx[GetSession()] = 0){}
+        set idx = 0
+       
+
 
             
                 
-
 
 
 
