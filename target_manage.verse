@@ -12,8 +12,8 @@ using { /Verse.org/Random }
 
 #todo 
 # make round start on trigger event
-# end when all targets destroyed
-# +5 second penalty if player falls off of path or teleport back 5 yards? or both?
+# re-position fuckin everythin
+# penalty for falling == ?
 
 #should use this globally so end device can only trigger after all 20 targs are hit
 var targ_idx : weak_map(session, int) = map{}
@@ -29,7 +29,6 @@ target_manage := class(creative_device):
     @editable var MaxPosition :vector3 = vector3{}
     @editable var pms : []prop_manipulator_device = array{}
     @editable var targs : []creative_prop = array{}
-
 
     OnBegin<override>()<suspends>:void=
 
@@ -55,9 +54,9 @@ target_manage := class(creative_device):
             NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=RandZ}
             MoveResult := Prop.MoveTo(NewPosition, NewRotation, 0.8)
             Sleep(0.01)
-            #minZ: -9666.539967
-            #maxZ: -9418.539967
-            #added 100
+            #minZ: 2125.999984
+            #maxZ: 2025.999984
+            #diff 100
 
     OnPropDamage(Agent: agent):void=
 
