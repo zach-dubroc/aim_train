@@ -3,84 +3,67 @@ using { /Fortnite.com/Devices }
 using { /Verse.org/Simulation }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /Fortnite.com/UI }
+using { /Verse.org/Random }
 
-time_text<localizes>(t: string)  :message = "{t}"
+
 stopwatch := class(creative_device):
 
     
     @editable stop_watch :timer_device = timer_device{}
     @editable b :billboard_device = billboard_device{}
-    var time :float = 0.0
-    var ms :string = ""
+    @editable HD : hud_message_device = hud_message_device{}
+    S2M<localizes><public>(Message : string)<computes>:message = "{Message}"
 
 
-    # Message<localizes> : message = "DON'T MISS A BALL, AND MAKE SURE YA DON'T FALL"
-    # TimeText<localizes>(c_time : float) : message = "{c_time}"
-    
-    OnBegin<override>()<suspends>:void=
-        {}
-        # Start()
+    OnBegin<override>()<suspends>:void={
+    }
 
     Start():void=
-        stop_watch.Start()
         spawn:
-            lap_start()
+            StartStopWatch()
+
     Stop():void=
         stop_watch.Complete()
+        # this should save lap time scoreboard
+        # need to pull elapsed time from GetSimulationElapsedTime()
+        # then can use the timer to store actual time, but like.. how? 
 
-    update_b():void=
-        
-        b.SetText(time_text(ms))
-        
-
-    lap_start()<suspends>:void=
+    StartStopWatch() <suspends> : void =
+        var Hours : int = 0
+        var Minutes : int = 0
+        var Seconds : int = 0
+        var Milliseconds : int = 0
         loop:
-            set time = stop_watch.GetActiveDuration()
-            set ms = "time: {FromSecondsToTimerFormat(time)}"
-
-            update_b()
-            Sleep(0.01)
-
-            if(time > 100.0):
+            Sleep(0.1)
+            if(Minutes >= 3):
+                HD.SetText(S2M("03:00:00+"))
                 break
-            
+            set Milliseconds += 1
+            if (Milliseconds >= 10):  
+                # 100 milliseconds == 1 second, 10 because sleeping for 0.01 or faster isn't functional
+                set Milliseconds = 0
+                set Seconds += 1
+                if (Seconds >= 60):
+                    set Seconds = 0
+                    set Minutes += 1
+                    if (Minutes >= 60):
+                        set Minutes = 0
+                        set Hours += 1
+            var HudMessage : string = ""
+            # set HudMessage = "{Hours}"
+            if (Minutes < 10):
+                set HudMessage += "0{Minutes}"
+            else:
+                set HudMessage += ":{Minutes}"
+            if (Seconds < 10):
+                set HudMessage += ":0{Seconds}"
+            else:
+                set HudMessage += ":{Seconds}"
+            if (Milliseconds < 10):
+                set HudMessage += ":{Milliseconds}{GetRandomInt(0,9)}{GetRandomInt(0,9)}"
+            else:
+                set HudMessage += ":{Milliseconds}"
+            HD.SetText(S2M(HudMessage))
 
-#this should start a stopwatch
-#runs until user end(et_device in game_manage)
-#->users time will go into the leaderboard
-#->if user lowers their times, old time should be replaced/hidden/deleted?
 
-# potentially the converter into stopwatch format 00:00.00
-# if player takes longer than like 3 mins then their score == "03:00.00+"
 
-    FromSecondsToTimerFormat<public>(Time : float, ?Decimals : int = 3):string=
-        DecimalPanner := Pow(10.0, Decimals * 1.0)   
-    
-        if:
-            TruncatedFormat := (Round[Time * DecimalPanner] * 1.0) / DecimalPanner
-            TotSecs := Floor[TruncatedFormat]
-            Dec := Round[(TruncatedFormat - (TotSecs * 1.0)) * DecimalPanner]
-        then:
-            var String_Dec : string = "{Dec}"
-            DecLength := String_Dec.Length
-            for(i := 0..(Decimals - DecLength - 1)):
-                set String_Dec = "0" + String_Dec
-    
-            var String_Secs : string = "00"
-            var String_Mins : string = "00"
-    
-            if(Secs := Mod[TotSecs, 60]):
-                if(Secs > 9):
-                    set String_Secs = ToString(Secs)  
-                else:
-                    set String_Secs = "0" + ToString(Secs)
-    
-            if(Mins := Floor[Time / 60.0]):
-                if(Mins > 9):
-                    set String_Mins = ToString(Mins)  
-                else:
-                    set String_Mins = "0" + ToString(Mins)
-    
-            return String_Mins + " : " + String_Secs + " : " + String_Dec
-    
-        ""
