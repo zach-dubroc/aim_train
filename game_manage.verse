@@ -4,7 +4,7 @@ using { /Verse.org/Simulation }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Fortnite.com/Playspaces }
-
+    
 # See https://dev.epicgames.com/documentation/en-us/uefn/create-your-own-device-in-verse for how to create a verse device.
 
 game_manage := class(creative_device):
@@ -42,7 +42,7 @@ game_manage := class(creative_device):
         Position := Transform.Translation
         Rotation := Transform.Rotation
         if (targ < 20):
-            NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=(Position.Z + 2150.0)}      
+            NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=(Position.Z + 1900.0)}      
             path_prop.MoveTo(NewPosition, Rotation, 0.8)
             p_teleport.Disable()
             s_teleport.Disable()
@@ -50,7 +50,7 @@ game_manage := class(creative_device):
 
             et.Enable()
         if(targ = 20):
-            NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=(Position.Z - 2150.0)}      
+            NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=(Position.Z - 1900.0)}      
             path_prop.MoveTo(NewPosition, Rotation, 0.1)
             p_teleport.Enable()
             s_teleport.Enable()
@@ -58,6 +58,9 @@ game_manage := class(creative_device):
 
             et.Disable()
             if (set targ_idx[GetSession()] = 0){}
+
+            # 2150 too high
+
 
         #-9648.0 ceiling
         #-9856.0

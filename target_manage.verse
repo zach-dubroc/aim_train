@@ -15,23 +15,22 @@ using { /Verse.org/Random }
 # re-position fuckin everythin
 # penalty for falling == ?
 
-#should use this globally so end device can only trigger after all 20 targs are hit
 var targ_idx : weak_map(session, int) = map{}
-
 rotate_tag := class(tag):
 target_manage := class(creative_device):
 
     var idx :int = 0
     var damage_lock :logic = false
-
     @editable var Speed :float = 0.05
     @editable var MinPosition :vector3 = vector3{}
     @editable var MaxPosition :vector3 = vector3{}
+    var PlayerPosition :vector3 = vector3{}
+    var PlayerRotation :rotation = rotation{}
     @editable var pms : []prop_manipulator_device = array{}
     @editable var targs : []creative_prop = array{}
+    @editable var cps : []race_checkpoint_device = array{} 
 
     OnBegin<override>()<suspends>:void=
-
         TagGenerator := FindCreativeObjectsWithTag(rotate_tag{})
         for (obj : TagGenerator):
             if (Prop := creative_prop[obj]):
@@ -40,7 +39,6 @@ target_manage := class(creative_device):
                 spawn:
                     MoveTargets(Prop)
  
-
     MoveTargets<private>(Prop: creative_prop)<suspends>:void=
         loop:
             Transform := Prop.GetTransform()
@@ -59,20 +57,20 @@ target_manage := class(creative_device):
             #diff 100
 
     OnPropDamage(Agent: agent):void=
-
         if(damage_lock = false):
             set damage_lock = true
             if (idx < targs.Length):
                 if (targs[idx].Hide()){}
+                if(Player:=player[Agent]):
+                    HandleCheckPoint(Player)
+                    if (cps[idx].TeleportTo[PlayerPosition, PlayerRotation]){}
+
                 if (idx + 1 < targs.Length):
                     if (targs[idx+1].Show()){}
                 set idx += 1
                 if(set targ_idx[GetSession()] = idx){}
-
-                if(y := targ_idx[GetSession()]){}
             spawn:
                 DamageLock(damage_lock)
-
     DamageLock(d: logic)<suspends>:void=
         Sleep(0.5)
         set damage_lock = false
@@ -86,11 +84,13 @@ target_manage := class(creative_device):
         set idx = 0
        
 
-
-            
-                
-
-
+    HandleCheckPoint(Agent: agent):void=
+        if(FortCharacter := Agent.GetFortCharacter[])
+        then:
+            CharacterTranslation := FortCharacter.GetTransform().Translation
+            CharacterRotation := FortCharacter.GetTransform().Rotation
+            set PlayerPosition = CharacterTranslation
+            set PlayerRotation = CharacterRotation
 
 
 
