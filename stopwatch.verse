@@ -20,7 +20,7 @@ stopwatch := class(creative_device):
 
     Start():void=
         rm.Begin()
-        
+
 
     Stop():void=
         rm.End()

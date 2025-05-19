@@ -12,8 +12,7 @@ using { /Verse.org/Random }
 
 #todo 
 # make round start on trigger event
-# re-position fuckin everythin
-# penalty for falling == ?
+# if player dies spawn back in locker_room
 
 var targ_idx : weak_map(session, int) = map{}
 rotate_tag := class(tag):
@@ -26,6 +25,8 @@ target_manage := class(creative_device):
     @editable var MaxPosition :vector3 = vector3{}
     var PlayerPosition :vector3 = vector3{}
     var PlayerRotation :rotation = rotation{}
+    var propPosition :vector3 = vector3{}
+    var propRotation :rotation = rotation{}
     @editable var pms : []prop_manipulator_device = array{}
     @editable var targs : []creative_prop = array{}
     @editable var cps : []race_checkpoint_device = array{} 
@@ -39,6 +40,15 @@ target_manage := class(creative_device):
                 spawn:
                     MoveTargets(Prop)
  
+    StartCheckPoints():void=
+            for (i :int = 0..pms.Length-1):
+                if(Transform := targs[i].GetTransform()):
+                    Rotation := Transform.Rotation
+                    Position := Transform.Translation
+                    set propPosition = Position
+                    set propRotation = Rotation
+                if(cps[i].TeleportTo[propPosition, propRotation]){}
+
     MoveTargets<private>(Prop: creative_prop)<suspends>:void=
         loop:
             Transform := Prop.GetTransform()
@@ -52,22 +62,27 @@ target_manage := class(creative_device):
             NewPosition := vector3{X:=Position.X, Y:=Position.Y, Z:=RandZ}
             MoveResult := Prop.MoveTo(NewPosition, NewRotation, 0.8)
             Sleep(0.01)
-            #minZ: 2125.999984
-            #maxZ: 2025.999984
-            #diff 100
-
+            # diff = 100
     OnPropDamage(Agent: agent):void=
+        
         if(damage_lock = false):
             set damage_lock = true
             if (idx < targs.Length):
+                if(Transform := targs[idx].GetTransform()){
+                    Rotation := Transform.Rotation
+                    Position := Transform.Translation
+                    set propPosition = Position
+                    set propRotation = Rotation
+                
+                }
                 if (targs[idx].Hide()){}
                 if(Player:=player[Agent]):
                     HandleCheckPoint(Player)
                     if (cps[idx].TeleportTo[PlayerPosition, PlayerRotation]){}
-
                 if (idx + 1 < targs.Length):
                     if (targs[idx+1].Show()){}
                 set idx += 1
+            
                 if(set targ_idx[GetSession()] = idx){}
             spawn:
                 DamageLock(damage_lock)
@@ -79,7 +94,7 @@ target_manage := class(creative_device):
         if(targs[0].Show()){}
         for(targ :int = 0 .. targs.Length-1):
             if (targ > 0):
-                if(targs[targ].Hide()){}
+              if(targs[targ].Hide()){}
         if (set targ_idx[GetSession()] = 0){}
         set idx = 0
        
@@ -91,6 +106,6 @@ target_manage := class(creative_device):
             CharacterRotation := FortCharacter.GetTransform().Rotation
             set PlayerPosition = CharacterTranslation
             set PlayerRotation = CharacterRotation
-
+        
 
 
