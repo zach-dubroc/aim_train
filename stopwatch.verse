@@ -8,20 +8,17 @@ using { /Verse.org/Random }
 
 stopwatch := class(creative_device):
     @editable rm :race_manager_device = race_manager_device{}
-
-    @editable b :billboard_device = billboard_device{}
-    @editable HD : hud_message_device = hud_message_device{}
-    S2M<localizes><public>(Message : string)<computes>:message = "{Message}"
-    var elap_time :float = 0.0
-    var time_diff :float = 0.0
-
-    OnBegin<override>()<suspends>:void={
-    }
+    #todo:
+    #rm only needs to display the formatted timer for lap times
+    OnBegin<override>()<suspends>:void=
+        {}
+   
 
     Start():void=
         rm.Begin()
 
-
     Stop():void=
+        #todo
+        #need lap stats here
+        #need to figure out how I can keep race to one player at a time
         rm.End()
-        # need the laptime saved/leaderboard updated here

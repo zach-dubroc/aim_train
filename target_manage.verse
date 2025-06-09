@@ -9,7 +9,6 @@ using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Random }
 
-
 #todo 
 # make round start on trigger event
 # if player dies spawn back in locker_room
@@ -64,8 +63,9 @@ target_manage := class(creative_device):
             Sleep(0.01)
             # diff = 100
     OnPropDamage(Agent: agent):void=
-        
         if(damage_lock = false):
+            Print("{idx}")
+
             set damage_lock = true
             if (idx < targs.Length):
                 if(Transform := targs[idx].GetTransform()){
@@ -73,7 +73,6 @@ target_manage := class(creative_device):
                     Position := Transform.Translation
                     set propPosition = Position
                     set propRotation = Rotation
-                
                 }
                 if (targs[idx].Hide()){}
                 if(Player:=player[Agent]):
@@ -86,6 +85,8 @@ target_manage := class(creative_device):
                 if(set targ_idx[GetSession()] = idx){}
             spawn:
                 DamageLock(damage_lock)
+
+                
     DamageLock(d: logic)<suspends>:void=
         Sleep(0.5)
         set damage_lock = false
@@ -94,11 +95,11 @@ target_manage := class(creative_device):
         if(targs[0].Show()){}
         for(targ :int = 0 .. targs.Length-1):
             if (targ > 0):
+                
               if(targs[targ].Hide()){}
         if (set targ_idx[GetSession()] = 0){}
         set idx = 0
        
-
     HandleCheckPoint(Agent: agent):void=
         if(FortCharacter := Agent.GetFortCharacter[])
         then:
