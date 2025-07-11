@@ -10,23 +10,22 @@ path_device := class(creative_device):
     @editable p_teleport :teleporter_device = teleporter_device{}
     @editable r_teleport :teleporter_device = teleporter_device{}
     @editable r2_teleport :teleporter_device = teleporter_device{}
-    @editable path_prop :creative_prop = creative_prop{}
-    @editable sw :stopwatch = stopwatch{}
+    var t_enable :logic = false
+   
+
 
    
-    OnBegin<override>()<suspends>:void=
-        {}
-    teleport_toggle(targ:int)<suspends>:void=
-        #runs everytime a player joins so need to re-factor calls course_manage
-
-        Print("tele toggle")
-        if (targ < 20): 
+    teleport_toggle(targ:int):void=
+        if (targ < 19 and t_enable = false):
+            Print("t_toggle disable called on: {targ}, false") 
             s_teleport.Disable() #send
-            p_teleport.Disable() #receive
-            r_teleport.Enable() #send
-        if(targ = 20):
-            #flip back for reset
-            s_teleport.Enable() #send 
-            p_teleport.Enable() #recieve
             r_teleport.Disable() #send
-            if (set targ_idx[GetSession()] = 0){}
+            set t_enable = true
+        if(targ = 19 and t_enable = true):
+            #then flip back for reset if course finished
+            Print("t_toggle enable called on: {targ}, true")
+            s_teleport.Enable() 
+            r_teleport.Enable()
+            set t_enable = false
+            # if (set targ_idx[GetSession()] = 0){}
+

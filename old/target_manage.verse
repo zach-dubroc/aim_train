@@ -8,11 +8,15 @@ using { /Verse.org/Simulation/Tags }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Random }
+
 #todo 
-#saving laptime as rank
+# make round start on trigger event
+# if player dies spawn back in locker_room
+
 var targ_idx : weak_map(session, int) = map{}
 rotate_tag := class(tag):
 target_manage := class(creative_device):
+
     var idx :int = 0
     var damage_lock :logic = false
     @editable var Speed :float = 0.05
@@ -28,13 +32,13 @@ target_manage := class(creative_device):
 
     OnBegin<override>()<suspends>:void=
         TagGenerator := FindCreativeObjectsWithTag(rotate_tag{})
-        for (PM : pms):
-            PM.DamagedEvent.Subscribe(OnPropDamage)
         for (obj : TagGenerator):
             if (Prop := creative_prop[obj]):
+                for (i :int = 0..pms.Length-1):
+                    if(pms[i].DamagedEvent.Subscribe(OnPropDamage)) {}
                 spawn:
                     MoveTargets(Prop)
-
+ 
     StartCheckPoints():void=
             for (i :int = 0..pms.Length-1):
                 if(Transform := targs[i].GetTransform()):
@@ -58,11 +62,11 @@ target_manage := class(creative_device):
             MoveResult := Prop.MoveTo(NewPosition, NewRotation, 0.8)
             Sleep(0.01)
             # diff = 100
-
     OnPropDamage(Agent: agent):void=
         if(damage_lock = false):
+            Print("{idx}")
+
             set damage_lock = true
-            Print("targets: {targs.Length}")
             if (idx < targs.Length):
                 if(Transform := targs[idx].GetTransform()){
                     Rotation := Transform.Rotation
@@ -70,8 +74,6 @@ target_manage := class(creative_device):
                     set propPosition = Position
                     set propRotation = Rotation
                 }
-                Print("72targ_idx: {idx}")
-
                 if (targs[idx].Hide()){}
                 if(Player:=player[Agent]):
                     HandleCheckPoint(Player)
@@ -81,20 +83,19 @@ target_manage := class(creative_device):
                 set idx += 1
             
                 if(set targ_idx[GetSession()] = idx){}
-                Print("81targ_idx: {idx}")
             spawn:
-                DamageLock()
+                DamageLock(damage_lock)
+
                 
-    DamageLock()<suspends>:void=
-        Sleep(0.2)
-        if(damage_lock=true){
-            set damage_lock = false
-        }
+    DamageLock(d: logic)<suspends>:void=
+        Sleep(0.5)
+        set damage_lock = false
 
     Start():void=
         if(targs[0].Show()){}
         for(targ :int = 0 .. targs.Length-1):
             if (targ > 0):
+                
               if(targs[targ].Hide()){}
         if (set targ_idx[GetSession()] = 0){}
         set idx = 0
@@ -108,47 +109,4 @@ target_manage := class(creative_device):
             set PlayerRotation = CharacterRotation
         
 
-# error pattern:
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 6
-# LogVerse: : 81targ_idx: 7
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 7
-# LogVerse: : 81targ_idx: 8
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 8
-# LogVerse: : 81targ_idx: 9
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 9
-# LogVerse: : 81targ_idx: 10
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 10
-# LogVerse: : 81targ_idx: 11
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 11
-# LogVerse: : 81targ_idx: 12
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 12
-# LogVerse: : 81targ_idx: 13
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 13
-# LogVerse: : 81targ_idx: 14
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 14
-# LogVerse: : 81targ_idx: 15
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 15
-# LogVerse: : 81targ_idx: 16
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 16
-# LogVerse: : 81targ_idx: 17
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 17
-# LogVerse: : 81targ_idx: 18
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 18
-# LogVerse: : 81targ_idx: 19
-# LogVerse: : targets: 20
-# LogVerse: : 72targ_idx: 19
-# LogVerse: : 81targ_idx: 20
-# LogVerse: : lap
+
